@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: AWS-Study Template
 
+Parameters:
+  DBPassword:
+    NoEcho: true
+    Type: String
+    Description: RDS master password
+
 Resources:
     #VPC
     VPC:                                  # VPCの設定
@@ -149,7 +155,7 @@ Resources:
                 - IpProtocol: tcp           # プロトコル（SSH）
                   FromPort: 22              # ポート範囲
                   ToPort: 22                # ポート範囲
-                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可      
+                  CidrIp: 207.65.168.137/32 # 自PCからのアクセス許可      
                 - IpProtocol: tcp           # プロトコル（HTTP）
                   FromPort: 80              # ポート範囲
                   ToPort: 80                # ポート範囲
@@ -200,7 +206,7 @@ Resources:
             PreferredBackupWindow: 15:00-16:00 # 追加設定（バックアップウィンドウ：ウィンドウを選択）
             PreferredMaintenanceWindow: sun:18:00-sun:19:00 # 追加設定（メンテナンスウィンドウ：ウィンドウを選択）
             LicenseModel: general-public-license
-            MasterUserPassword: abcz1112     # 認証情報の設定（セルフマネージド：マスターパスワード）
+            MasterUserPassword: !Ref DBPassword # 認証情報の設定（セルフマネージド：マスターパスワード）
             DBName: mydatabase               # 認証情報の設定（DBインスタンス識別子）
             VPCSecurityGroups:
                 - !Ref DBSecurityGroup
@@ -249,7 +255,7 @@ Resources:
       Type: AWS::ElasticLoadBalancingV2::TargetGroup
       Properties:
         Name: aws-study-tg                    # Setting（ターゲットグループ名）
-        Port: 80                              # Setting（ポート）
+        Port: 8080                            # Setting（ポート）
         Protocol: HTTP                        # Setting（プロトコル）
         VpcId: !Ref VPC                       # Setting（VPC）
         TargetType: instance                  # Setting（ターゲットの種類：インスタンス）
