@@ -1,0 +1,280 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: AWS-Study Template
+
+Resources:
+    #VPC
+    VPC:                                  # VPCの設定
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.2.0.0/16        # 10.2.0.0～10.2.255.255 (65.536個のIP)
+            EnableDnsHostnames: true      # DNSオプション：DNSホスト名を有効化
+            EnableDnsSupport: true        # DNSオプション：DNS解決を有効化
+            Tags:                         
+                - Key: Name
+                  Value: aws-study-vpc
+                  
+    #Subnet
+    PublicSubnetAZ1a:                     # PublicSubnetAZ1aの設定
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ap-northeast-1a
+        MapPublicIpOnLaunch : true        # 外部アクセスあり（パブリックIPの自動付与）
+        VpcId: !Ref VPC
+        CidrBlock: 10.2.0.0/24            # 10.2.0.0～10.2.0.255 (256個のIP)
+        Tags:
+          - Key: Name
+            Value: aws-study-publicsubnetaz1a
+
+    PublicSubnetAZ1c:                     # PublicSubnetAZ1cの設定
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ap-northeast-1c
+        MapPublicIpOnLaunch : true        # 外部アクセスあり（パブリックIPの自動付与）
+        VpcId: !Ref VPC
+        CidrBlock: 10.2.1.0/24            # 10.2.1.0～10.2.1.255 (256個のIP)
+        Tags:
+          - Key: Name
+            Value: aws-study-publicsubnetaz1c
+
+    PrivateSubnetAZ1a:                    # PrivateSubnetAZ1aの設定
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ap-northeast-1a
+        MapPublicIpOnLaunch : false       # 外部アクセスなし
+        VpcId: !Ref VPC
+        CidrBlock: 10.2.2.0/24            #  10.2.2.0～10.2.2.255 (256個のIP)
+        Tags:
+          - Key: Name
+            Value: aws-study-privatesubnetaz1a
+
+    PrivateSubnetAZ1c:                    # PrivateSubnetAZ1cの設定
+      Type: AWS::EC2::Subnet
+      Properties:
+        AvailabilityZone: ap-northeast-1c
+        MapPublicIpOnLaunch : false       # 外部アクセスなし
+        VpcId: !Ref VPC
+        CidrBlock: 10.2.3.0/24            #  10.2.3.0～10.2.3.255 (256個のIP)
+        Tags:
+          - Key: Name
+            Value: aws-study-privatesubnetaz1c
+      
+    #InrenetGateway
+    InternetGateway:                      # InternetGatewayのリソース作成
+      Type: AWS::EC2::InternetGateway
+      Properties:
+        Tags:
+          - Key: Name
+            Value: aws-study-IGW
+
+    AttachGateway:                        # InternetGatewayをVPCへ接続
+      Type: AWS::EC2::VPCGatewayAttachment
+      Properties:
+        VpcId: !Ref VPC
+        InternetGatewayId: !Ref InternetGateway
+    
+    #RouteTable
+    PublicRouteTable:                     # PublicSubnetのルートテーブル
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+            Tags:
+              - Key: Name
+                Value: PublicRouteTable
+
+    PublicRoute:                           # PublicSubnetのルートテーブル:0.0.0.0/0 --> IGW
+        Type: AWS::EC2::Route
+        Properties:
+            RouteTableId: !Ref PublicRouteTable
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGateway
+
+    PublicSubnetAZ1aRouteTableAssociation:  # ルートテーブルとSubnetとの関連付け（Subnet:PublicSubnetAZ1a)
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnetAZ1a
+            RouteTableId: !Ref PublicRouteTable           
+   
+    PublicSubnetAZ1cRouteTableAssociation:  # ルートテーブルとSubnetとの関連付け（Subnet:PublicSubnetAZ1c)
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PublicSubnetAZ1c
+            RouteTableId: !Ref PublicRouteTable
+    
+    PrivateRouteTableAZ1a:                  # PrivateSubnetのルートテーブル：VPC内通信のみ
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+
+    PrivateSubnetAZ1aRouteTableAssociation: # ルートテーブルとSubnetとの関連付け（Subnet:PrivateSubnetAZ1a)
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnetAZ1a
+            RouteTableId: !Ref PrivateRouteTableAZ1a
+
+    PrivateRouteTableAZ1c:                  # PrivateSubnetのルートテーブル：VPC内通信のみ
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+
+    PrivateSubnetAZ1cRouteTableAssociation: # ルートテーブルとSubnetとの関連付け（Subnet:PrivateSubnetAZ1c)
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            SubnetId: !Ref PrivateSubnetAZ1c
+            RouteTableId: !Ref PrivateRouteTableAZ1c
+
+    #EC2
+    EC2InstanceInPublicAZ1a:
+        Type: AWS::EC2::Instance
+        Properties:
+            InstanceType: t3.micro          # インスタンスタイプ
+            ImageId: ami-01205c30badb279ec  # アプリケーションおよびOSイメージ（Amazonマシンイメージ）
+            SubnetId: !Ref PublicSubnetAZ1a # ネットワーク設定（サブネット）
+            KeyName: aws-study              # キーペア（キーペア名）
+            Monitoring: false               # 高度な詳細（CloudWatchでモニタリングをするかの設定）
+            SecurityGroupIds:
+                - !Ref EC2SecurityGroup     # ネットワーク設定（セキュリティグループ）
+            Tags:
+                - Key: Name
+                  Value: EC2InPublicAZ1a
+            DisableApiTermination: false     # APIでの実行を許可しない
+            InstanceInitiatedShutdownBehavior: stop # 高度な詳細（シャットダウン動作：Initialのシャットダウン動作を停止に設定）
+    
+    #SecurityGroup
+    EC2SecurityGroup:                       # ネットワーク設定（セキュリティグループ）
+        Type: AWS::EC2::SecurityGroup
+        Properties:
+            GroupDescription: EC2 access
+            VpcId: !Ref VPC
+            SecurityGroupIngress:           # インバウンドセキュリティグループのルール
+                - IpProtocol: tcp           # プロトコル（SSH）
+                  FromPort: 22              # ポート範囲
+                  ToPort: 22                # ポート範囲
+                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可      
+                - IpProtocol: tcp           # プロトコル（HTTP）
+                  FromPort: 80              # ポート範囲
+                  ToPort: 80                # ポート範囲
+                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
+                - IpProtocol: tcp           # プロトコル（HTTP）
+                  FromPort: 8080            # ポート範囲
+                  ToPort: 8080              # ポート範囲
+                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
+                - IpProtocol: tcp           # プロトコル（HTTPS）
+                  FromPort: 443             # ポート範囲
+                  ToPort: 443               # ポート範囲
+                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
+            SecurityGroupEgress:            # アウトバウンドセキュリティグループのルール
+                - IpProtocol: -1
+                  CidrIp: 0.0.0.0/0         # 全IPアドレスへのアクセス許可  
+            Tags:
+                - Key: Name
+                  Value: aws-study-EC2-SG
+      
+    #RDS
+    DBSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+            GroupDescription: MySQL access
+            VpcId: !Ref VPC                 # 接続（VPCセキュリティグループ：既存の選択）
+            SecurityGroupIngress:           # インバウンドセキュリティグループのルール
+                - IpProtocol: tcp           # プロトコル
+                  FromPort: 3306            # 接続（追加設定：データベースポート）
+                  ToPort: 3306              # 接続（追加設定：データベースポート）
+                  SourceSecurityGroupId: !Ref EC2SecurityGroup  #EC2SecurityGroup に属するインスタンスからの TCP 3306 ポートへの通信のみ許可
+            SecurityGroupEgress:            # アウトバウンドセキュリティグループのルール
+                - IpProtocol: -1
+                  CidrIp: 0.0.0.0/0         # 全IPアドレスへのアクセス許可
+            Tags:
+                - Key: Name
+                  Value: aws-study-DB-SG
+
+    RDSInstance:
+      Type: AWS::RDS::DBInstance
+      Properties:
+            DBInstanceClass: db.t3.micro     # インスタンスの設定（DBインスタンスクラス）
+            AllocatedStorage: 20             # ストレージ（ストレージ割り当て）
+            AllowMajorVersionUpgrade: false  # Majorupgrateを許可しない *Majorupgrateすると動かなくなるリスクあり
+            AutoMinorVersionUpgrade: true    # 追加設定（マイナーバージョン自動アップグレード有効化）
+            Engine: mysql                    # エンジンのオプション（エンジンのタイプ）
+            EngineVersion: 8.0.42            # エンジンのオプション（エンジンバージョン）
+            MasterUsername: root             # 認証情報の設定（マスターユーザー名）
+            PreferredBackupWindow: 15:00-16:00 # 追加設定（バックアップウィンドウ：ウィンドウを選択）
+            PreferredMaintenanceWindow: sun:18:00-sun:19:00 # 追加設定（メンテナンスウィンドウ：ウィンドウを選択）
+            LicenseModel: general-public-license
+            MasterUserPassword: abcz1112     # 認証情報の設定（セルフマネージド：マスターパスワード）
+            DBName: mydatabase               # 認証情報の設定（DBインスタンス識別子）
+            VPCSecurityGroups:
+                - !Ref DBSecurityGroup
+            DBSubnetGroupName: !Ref RDSSubnetGroup # 接続（DBサブネットグループ）
+            MultiAZ: false                   # 可用性と耐久性（デプロイオプション：シングルAZ DB）
+            PubliclyAccessible: false        # 接続（パブリックアクセス；なし）
+            StorageType: gp3                 # ストレージ（汎用SSD(gp3)）
+            BackupRetentionPeriod: 7         # 追加設定（バックアップ保持期間：7日間）
+            DeletionProtection: true         # 追加設定（削除保護の有効化）
+            Tags:
+                - Key: Name
+                  Value: RDSInstance
+    RDSSubnetGroup:                          # 接続（DBサブネットグループ）
+      Type: AWS::RDS::DBSubnetGroup
+      Properties:
+            DBSubnetGroupDescription: Subnet group for RDS
+            SubnetIds:                       # サブネットIDは必ず２つ以上必要
+                - !Ref PrivateSubnetAZ1a
+                - !Ref PrivateSubnetAZ1c
+            DBSubnetGroupName: rds-subnet-group
+
+    #ELB
+    ALBSecurityGroup:                        # セキュリティグループの設定
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Allow HTTP access to ALB
+        VpcId: !Ref VPC                      # ネットワークマッピング（VPC）
+        SecurityGroupIngress:
+          - IpProtocol: tcp                  # プロトコル（HTTP）
+            FromPort: 80                     # ポート
+            ToPort: 80                       # ポート
+            CidrIp: 0.0.0.0/0                # 全IPアドレスからのアクセス許可
+    ALB:                                     # アプリケーションロードバランサ―の作成
+      Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+      Properties:
+        Name: aws-study-ALB                  # 基本的な設定（ロードバランサ―名）
+        Scheme: internet-facing              # 基本的な設定（スキーム：インターネット向け）
+        Subnets:                             # ネットワークマッピング（アベイラビリティゾーンとサブネット）
+          - !Ref PublicSubnetAZ1a
+          - !Ref PublicSubnetAZ1c
+        SecurityGroups:
+          - !Ref ALBSecurityGroup            # セキュリティグループの設定
+        Type: application
+    
+    TargetGroup:                              # ターゲットグループの作成　＊ALBリソース後、ターゲットの登録はGUIで実施
+      Type: AWS::ElasticLoadBalancingV2::TargetGroup
+      Properties:
+        Name: aws-study-tg                    # Setting（ターゲットグループ名）
+        Port: 80                              # Setting（ポート）
+        Protocol: HTTP                        # Setting（プロトコル）
+        VpcId: !Ref VPC                       # Setting（VPC）
+        TargetType: instance                  # Setting（ターゲットの種類：インスタンス）
+        HealthCheckProtocol: HTTP             # ヘルスチェック（ヘルスチェックプロトコル）
+        HealthCheckPort: "traffic-port"       # ヘルスチェックの詳細設定（ヘルスチェックポート：トラフィックポート）
+        HealthCheckPath: /                    # ヘルスチェック（ヘルスチェックパス）
+        HealthCheckIntervalSeconds: 30        # ヘルスチェックの詳細設定（間隔：30秒）
+        HealthCheckTimeoutSeconds: 5          # ヘルスチェックの詳細設定（タイムアウト：5秒）
+        HealthyThresholdCount: 5              # ヘルスチェックの詳細設定（正常のしきい値：5回）
+        UnhealthyThresholdCount: 2            # ヘルスチェックの詳細設定（非正常のしきい値：2回）
+        Matcher:        
+          HttpCode: 200,300,301               # ヘルスチェックの詳細設定（成功コード）
+        Tags:
+            - Key: Name
+              Value: aws-study-alb-targetgroup
+        Targets:                              # ターゲットを登録
+          - Id: !Ref EC2InstanceInPublicAZ1a  # ターゲットを登録（使用可能なインスタンス）
+            Port: 8080                        # ターゲットを登録（選択したインスタンスのポート：保留中として以下を含める）
+  
+    Listener:                                 # リスナーの設定
+      Type: AWS::ElasticLoadBalancingV2::Listener
+      Properties:
+        LoadBalancerArn: !Ref ALB
+        Port: 80                              # リスナーとルーティング（ポート）
+        Protocol: HTTP                        # リスナーとルーティング（プロトコル）
+        DefaultActions:
+          - Type: forward                     # アクションのルーティング（ターゲットグループへ転送）
+            TargetGroupArn: !Ref TargetGroup
