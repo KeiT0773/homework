@@ -160,16 +160,14 @@ Resources:
                   FromPort: 80              # ポート範囲
                   ToPort: 80                # ポート範囲
                   SourceSecurityGroupId: !Ref ALBSecurityGroup # ALB のセキュリティグループのみからの受信を許可
-#                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
                 - IpProtocol: tcp           # プロトコル（HTTP）
                   FromPort: 8080            # ポート範囲
                   ToPort: 8080              # ポート範囲
                   SourceSecurityGroupId: !Ref ALBSecurityGroup # ALB のセキュリティグループのみからの受信を許可
-#                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
                 - IpProtocol: tcp           # プロトコル（HTTPS）
                   FromPort: 443             # ポート範囲
                   ToPort: 443               # ポート範囲
-                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
+                  SourceSecurityGroupId: !Ref ALBSecurityGroup # ALB のセキュリティグループのみからの受信を許可
             SecurityGroupEgress:            # アウトバウンドセキュリティグループのルール
                 - IpProtocol: -1
                   CidrIp: 0.0.0.0/0         # 全IPアドレスへのアクセス許可  
