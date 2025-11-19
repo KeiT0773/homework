@@ -1,6 +1,12 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: AWS-Study Template
 
+Parameters:
+  DBPassword:
+    NoEcho: true
+    Type: String
+    Description: RDS master password
+
 Resources:
     #VPC
     VPC:                                  # VPCの設定
@@ -149,19 +155,19 @@ Resources:
                 - IpProtocol: tcp           # プロトコル（SSH）
                   FromPort: 22              # ポート範囲
                   ToPort: 22                # ポート範囲
-                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可      
+                  CidrIp: 207.65.168.137/32 # 自PCからのアクセス許可      
                 - IpProtocol: tcp           # プロトコル（HTTP）
                   FromPort: 80              # ポート範囲
                   ToPort: 80                # ポート範囲
-                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
+                  SourceSecurityGroupId: !Ref ALBSecurityGroup # ALB のセキュリティグループのみからの受信を許可
                 - IpProtocol: tcp           # プロトコル（HTTP）
                   FromPort: 8080            # ポート範囲
                   ToPort: 8080              # ポート範囲
-                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
+                  SourceSecurityGroupId: !Ref ALBSecurityGroup # ALB のセキュリティグループのみからの受信を許可
                 - IpProtocol: tcp           # プロトコル（HTTPS）
                   FromPort: 443             # ポート範囲
                   ToPort: 443               # ポート範囲
-                  CidrIp: 0.0.0.0/0         # 全IPアドレスからのアクセス許可 
+                  SourceSecurityGroupId: !Ref ALBSecurityGroup # ALB のセキュリティグループのみからの受信を許可
             SecurityGroupEgress:            # アウトバウンドセキュリティグループのルール
                 - IpProtocol: -1
                   CidrIp: 0.0.0.0/0         # 全IPアドレスへのアクセス許可  
@@ -200,7 +206,7 @@ Resources:
             PreferredBackupWindow: 15:00-16:00 # 追加設定（バックアップウィンドウ：ウィンドウを選択）
             PreferredMaintenanceWindow: sun:18:00-sun:19:00 # 追加設定（メンテナンスウィンドウ：ウィンドウを選択）
             LicenseModel: general-public-license
-            MasterUserPassword: abcz1112     # 認証情報の設定（セルフマネージド：マスターパスワード）
+            MasterUserPassword: !Ref DBPassword # 認証情報の設定（セルフマネージド：マスターパスワード）
             DBName: mydatabase               # 認証情報の設定（DBインスタンス識別子）
             VPCSecurityGroups:
                 - !Ref DBSecurityGroup
@@ -249,7 +255,7 @@ Resources:
       Type: AWS::ElasticLoadBalancingV2::TargetGroup
       Properties:
         Name: aws-study-tg                    # Setting（ターゲットグループ名）
-        Port: 80                              # Setting（ポート）
+        Port: 8080                            # Setting（ポート）
         Protocol: HTTP                        # Setting（プロトコル）
         VpcId: !Ref VPC                       # Setting（VPC）
         TargetType: instance                  # Setting（ターゲットの種類：インスタンス）
@@ -278,3 +284,59 @@ Resources:
         DefaultActions:
           - Type: forward                     # アクションのルーティング（ターゲットグループへ転送）
             TargetGroupArn: !Ref TargetGroup
+    
+    #CloudWatch
+    EC2CPUUtilizationAlarm: # 15 分内の2データポイントのCPUUtilization >= 70
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: aws-study-cpu-utilization-alarm
+        AlarmDescription: "EC2の使用率が70%以上になりました"
+        Namespace: "AWS/EC2"
+        Dimensions:
+          - Value: !Ref EC2InstanceInPublicAZ1a # アラーム対象
+            Name: "InstanceId"
+        MetricName: "CPUUtilization"          # アラームのしきい値（CPU使用率）
+        Unit: "Percent"                       # しきい値の単位
+
+        Period: 300                           # アラームのしきい値（期間：5分/period）
+        Statistic: "Average"                  # サンプルのグループ化基準
+
+        Threshold: 70                         # 70%
+        ComparisonOperator: "GreaterThanOrEqualToThreshold" # 以上
+        EvaluationPeriods: 3                  # 評価期間：3 Period x 5分/period = 15分
+        DatapointsToAlarm: 2                  # アラームのしきい値（連続した期間：2 データポイント）
+        TreatMissingData: "missing"           # 欠落データの処理：”欠落データが見つかりませんとして処理”
+
+        ActionsEnabled: true
+        AlarmActions:                         # アラーム通知 by Eメール
+          - arn:aws:sns:ap-northeast-1:512795167785:Cloudwatch-alert-topic
+    #WAF
+    WebACL:
+      Type: AWS::WAFv2::WebACL
+      Properties:
+        Name: aws-study-web-acl
+        Scope: REGIONAL                     # 特定Regionに依存するサービス（Load Balancerなど）
+        DefaultAction:                      # ルールに該当しない安全なリクエスト
+          Allow: {}
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          SampledRequestsEnabled: true
+          MetricName: aws-study-acl
+        Rules:                              # Core rule set (Capacity:700)
+          - Name: AWS-AWSManagedRulesCommonRuleSet
+            Priority: 1
+            OverrideAction:
+              None: {}
+            VisibilityConfig:
+              CloudWatchMetricsEnabled: true
+              SampledRequestsEnabled: true
+              MetricName: AWS-AWSManagedRulesCommonRuleSet
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesCommonRuleSet
+    WebACLAssociation:                    # Web ACLに関連付けするresourcesの設定 (Resource type : Aplication Load Balancer)
+        Type: AWS::WAFv2::WebACLAssociation
+        Properties:
+          ResourceArn: !GetAtt ALB.LoadBalancerArn
+          WebACLArn: !GetAtt WebACL.Arn
