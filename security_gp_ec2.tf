@@ -1,3 +1,6 @@
+# variables
+variable "my_cidr_block" {}
+
 # EC2 securiry_group 
 resource "aws_security_group" "ec2" {
   name        = "ec2_sg"
@@ -8,7 +11,7 @@ resource "aws_security_group" "ec2" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["207.65.168.137/32"]
+    cidr_blocks = ["${var.my_cidr_block}"]
   }
 
   ingress {
@@ -39,7 +42,7 @@ resource "aws_security_group" "ec2" {
     from_port       = 0
     to_port         = 0
     protocol        = "-1"
-    security_groups = [aws_security_group.elb.id]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
 

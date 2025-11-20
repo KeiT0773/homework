@@ -1,3 +1,6 @@
+# variables
+variable "my_alarm_action_arn" {}
+
 # CloudWatch
 resource "aws_cloudwatch_metric_alarm" "aws-study-cloudwatch" {
   alarm_name          = "aws-study-cpu-utilization-alarm"
@@ -13,7 +16,7 @@ resource "aws_cloudwatch_metric_alarm" "aws-study-cloudwatch" {
   alarm_description   = "This metric monitors ec2 cpu utilization"
   actions_enabled     = true
   alarm_actions = [
-    "arn:aws:sns:ap-northeast-1:512795167785:Cloudwatch-alert-topic"
+    "${var.my_alarm_action_arn}"
   ]
   tags = {
     Name = "aws-study-cloudwatch-${var.my_env}"
