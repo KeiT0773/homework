@@ -6,7 +6,7 @@ resource "aws_lb" "aws-study-lb" {
   security_groups    = [aws_security_group.elb.id]
   subnets            = [aws_subnet.PublicAZ1a.id, aws_subnet.PublicAZ1c.id]
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   tags = {
     Name = "aws-study-elb-${var.my_env}"
