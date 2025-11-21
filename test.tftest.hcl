@@ -1,7 +1,12 @@
+# Valiables
+variables {
+  my_env = "first-test"
+}
+
 # test
 run "check_VPC" {
 
-  command = apply
+  command = plan
 
   assert {
     condition     = aws_vpc.main_vpc.cidr_block == "10.2.0.0/16"
@@ -32,7 +37,7 @@ run "check_VPC" {
 
 run "check_EC2" {
 
-  command = apply
+  command = plan
 
   assert {
     condition     = aws_instance.ec2.ami == "ami-01205c30badb279ec"
@@ -47,7 +52,7 @@ run "check_EC2" {
 }
 
 run "check_EC2_SG_SSH" {
-  command = apply
+  command = plan
 
   assert {
     condition = anytrue([
@@ -61,7 +66,7 @@ run "check_EC2_SG_SSH" {
 
 run "check_RDS" {
 
-  command = apply
+  command = plan
 
   assert {
     condition     = aws_db_instance.aws-study-rds.engine == "mysql"
@@ -77,7 +82,7 @@ run "check_RDS" {
 
 run "check_ELB" {
 
-  command = apply
+  command = plan
 
   assert {
     condition     = aws_lb_target_group.aws-study-lb-tg.port == 8080
@@ -92,7 +97,7 @@ run "check_ELB" {
 }
 
 run "check_WAF_rule" {
-  command = apply
+  command = plan
 
   assert {
     condition = anytrue([
@@ -111,7 +116,7 @@ run "check_WAF_rule" {
 
 run "check_CloudWatch_metrics" {
 
-  command = apply
+  command = plan
 
   assert {
     condition     = aws_cloudwatch_metric_alarm.aws-study-cloudwatch.metric_name == "CPUUtilization"
