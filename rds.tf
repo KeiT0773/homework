@@ -15,6 +15,7 @@ resource "aws_db_instance" "aws-study-rds" {
   allocated_storage           = 20
   allow_major_version_upgrade = false
   auto_minor_version_upgrade  = true
+  skip_final_snapshot         = true
   # authentication
   username = "root"
   password = jsondecode(data.aws_secretsmanager_secret_version.rds_secret_version.secret_string)["password"]
