@@ -113,7 +113,7 @@ run "check_ELB" {
   assert {
     condition     = aws_lb_target_group_attachment.ec2_2.port == 8080
     error_message = "ELB target group attachment port did not match expected"
-  }  
+  }
 
 }
 
