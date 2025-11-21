@@ -35,7 +35,7 @@ output "aws_study-db_instance" {
 
 # RDS-subnet-group
 resource "aws_db_subnet_group" "aws-study-rds-subnet" {
-  name       = "aws-study-rds-subnet-group"
+  name       = "aws-study-rds-subnet-group-${var.my_env}"
   subnet_ids = [aws_subnet.PrivateAZ1a.id, aws_subnet.PrivateAZ1c.id]
   tags = {
     Name = "aws-study-rds-subnet-group-${var.my_env}"
@@ -48,7 +48,7 @@ output "aws_study-db_subnet" {
 
 # RDS-parameter
 resource "aws_db_parameter_group" "aws-study-rds-params" {
-  name        = "aws-study-rds-params"
+  name        = "aws-study-rds-params-${var.my_env}"
   family      = "mysql8.0"
   description = "Custom parameter group for aws-study RDS"
   # Defalt character set for MySQL server
