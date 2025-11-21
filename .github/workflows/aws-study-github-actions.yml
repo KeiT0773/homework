@@ -2,7 +2,6 @@ name: Terraform CI/CD
 
 on:
   pull_request:
-    branches: [test]
     paths:
       - "*.tf"
       - "*.tftest.hcl"
