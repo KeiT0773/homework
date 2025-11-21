@@ -8,7 +8,7 @@ data "aws_secretsmanager_secret_version" "rds_secret_version" {
 
 # RDS instance
 resource "aws_db_instance" "aws-study-rds" {
-  identifier                  = "aws-study-database"
+  identifier                  = "aws-study-database-${var.my_env}"
   engine                      = "mysql"
   engine_version              = "8.0.42"
   instance_class              = "db.t3.micro"

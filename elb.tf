@@ -1,6 +1,6 @@
 # ELB
 resource "aws_lb" "aws-study-lb" {
-  name               = "aws-study-lb"
+  name               = "aws-study-lb-${var.my_env}"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.elb.id]
@@ -19,7 +19,7 @@ output "elb_id" {
 
 # ELB Target group
 resource "aws_lb_target_group" "aws-study-lb-tg" {
-  name        = "aws-study-lb-tg"
+  name        = "aws-study-lb-tg-${var.my_env}"
   port        = 8080
   target_type = "instance"
   protocol    = "HTTP"
