@@ -40,11 +40,18 @@ resource "aws_lb_target_group" "aws-study-lb-tg" {
   }
 }
 # ELB Targets
-resource "aws_lb_target_group_attachment" "aws-study-lb-tg-targets" {
+resource "aws_lb_target_group_attachment" "ec2_1" {
   target_group_arn = aws_lb_target_group.aws-study-lb-tg.arn
-  target_id        = aws_instance.ec2.id
+  target_id        = aws_instance.ec2_1.id
   port             = 8080
 }
+
+resource "aws_lb_target_group_attachment" "ec2_2" {
+  target_group_arn = aws_lb_target_group.aws-study-lb-tg.arn
+  target_id        = aws_instance.ec2_2.id
+  port             = 8080
+}
+
 # ELB Listener
 resource "aws_lb_listener" "aws-study-lb-listener" {
   load_balancer_arn = aws_lb.aws-study-lb.arn

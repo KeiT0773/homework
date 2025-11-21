@@ -35,17 +35,33 @@ run "check_VPC" {
 
 }
 
-run "check_EC2" {
+run "check_EC2_1" {
 
   command = apply
 
   assert {
-    condition     = aws_instance.ec2.ami == "ami-01205c30badb279ec"
+    condition     = aws_instance.ec2_1.ami == "ami-01205c30badb279ec"
     error_message = "EC2 ami did not match expected"
   }
 
   assert {
-    condition     = aws_instance.ec2.instance_type == "t3.micro"
+    condition     = aws_instance.ec2_1.instance_type == "t3.micro"
+    error_message = "EC2 instance type did not match expected"
+  }
+
+}
+
+run "check_EC2_2" {
+
+  command = apply
+
+  assert {
+    condition     = aws_instance.ec2_2.ami == "ami-01205c30badb279ec"
+    error_message = "EC2 ami did not match expected"
+  }
+
+  assert {
+    condition     = aws_instance.ec2_2.instance_type == "t3.micro"
     error_message = "EC2 instance type did not match expected"
   }
 
@@ -90,7 +106,12 @@ run "check_ELB" {
   }
 
   assert {
-    condition     = aws_lb_target_group_attachment.aws-study-lb-tg-targets.port == 8080
+    condition     = aws_lb_target_group_attachment.ec2_1.port == 8080
+    error_message = "ELB target group attachment port did not match expected"
+  }
+
+  assert {
+    condition     = aws_lb_target_group_attachment.ec2_2.port == 8080
     error_message = "ELB target group attachment port did not match expected"
   }
 
