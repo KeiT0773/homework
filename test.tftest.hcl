@@ -1,6 +1,6 @@
 # Valiables
 variables {
-  my_env = "first-test"
+  my_env = "test"
 }
 
 # test
