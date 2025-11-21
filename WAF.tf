@@ -1,6 +1,6 @@
 # WAF
 resource "aws_wafv2_web_acl" "aws-study-web-acl" {
-  name        = "aws-study-web-acl"
+  name        = "aws-study-web-acl-${var.my_env}"
   description = "First managed rule by access control list by aws"
   scope       = "REGIONAL"
 
