@@ -28,8 +28,8 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws-key.pem
-          chmod 600 ~/.ssh/aws-key.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws-study.pem
+          chmod 600 ~/.ssh/aws-study.pem
 
       - name: Run Playbook
         run: ansible-playbook -i inventory.yml playbook.yml --ssh-extra-args='-o StrictHostKeyChecking=no'
