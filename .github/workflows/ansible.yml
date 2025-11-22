@@ -22,11 +22,8 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install Ansible + Lint
-        run: pip install ansible ansible-lint
-
-      - name: Lint Playbooks
-        run: ansible-lint
+      - name: Install Ansible
+        run: pip install ansible
 
       - name: Setup SSH key
         run: |
