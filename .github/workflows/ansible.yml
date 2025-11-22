@@ -1,0 +1,37 @@
+name: Ansible Only Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "ansible/**"
+
+jobs:
+  ansible:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws-study.pem
+          chmod 600 ~/.ssh/aws-study.pem
+
+      - name: Run Playbook
+        run: ansible-playbook -i inventory.yml playbook.yml --ssh-extra-args='-o StrictHostKeyChecking=no'
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
