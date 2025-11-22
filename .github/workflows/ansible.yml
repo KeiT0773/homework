@@ -23,7 +23,7 @@ jobs:
           python-version: '3.13'
 
       - name: Install Ansible + Lint
-        run: pip install ansible==2.17 ansible-lint
+        run: pip install ansible ansible-lint
 
       - name: Lint Playbooks
         run: ansible-lint
