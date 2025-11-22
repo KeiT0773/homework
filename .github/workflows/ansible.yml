@@ -28,7 +28,7 @@ jobs:
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/mykey.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws-key.pem
           chmod 600 ~/.ssh/mykey.pem
 
       - name: Run Playbook
