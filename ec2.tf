@@ -1,5 +1,6 @@
 # variables
 variable "my_ami" {}
+variable "key_name" {}
 
 # EC2
 resource "aws_instance" "ec2_1" {
@@ -7,6 +8,7 @@ resource "aws_instance" "ec2_1" {
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.PublicAZ1a.id
   vpc_security_group_ids = [aws_security_group.ec2.id]
+  key_name               = var.key_name
 
   tags = {
     Name = "aws-study-ec2_1-${var.my_env}"
@@ -22,6 +24,7 @@ resource "aws_instance" "ec2_2" {
   instance_type          = "t3.micro"
   subnet_id              = aws_subnet.PublicAZ1c.id
   vpc_security_group_ids = [aws_security_group.ec2.id]
+  key_name               = var.key_name
 
   tags = {
     Name = "aws-study-ec2_2-${var.my_env}"

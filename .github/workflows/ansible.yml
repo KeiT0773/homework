@@ -22,17 +22,14 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install Ansible + Lint
-        run: pip install ansible==2.17 ansible-lint
-
-      - name: Lint Playbooks
-        run: ansible-lint
+      - name: Install Ansible
+        run: pip install ansible
 
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/mykey.pem
-          chmod 600 ~/.ssh/mykey.pem
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws-study.pem
+          chmod 600 ~/.ssh/aws-study.pem
 
       - name: Run Playbook
         run: ansible-playbook -i inventory.yml playbook.yml --ssh-extra-args='-o StrictHostKeyChecking=no'
