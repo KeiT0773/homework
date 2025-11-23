@@ -5,14 +5,14 @@ on:
     paths:
       - "*.tf"
       - "*.tftest.hcl"
-      - ".github/workflows/*.yaml"
+      - ".github/workflows/*.yml"
       - "ansible/**"
   push:
     branches: [main]
     paths:
       - "*.tf"
       - "*.tftest.hcl"
-      - ".github/workflows/*.yaml"
+      - ".github/workflows/*.yml"
       - "ansible/**"
 
 jobs:
