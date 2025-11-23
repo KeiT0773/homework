@@ -1,9 +1,9 @@
-name: Ansible Only Deploy
+name: Ansible Deploy
 
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["Terraform CI/CD"]
+    workflows: ["Terraform Push"]
     types:
       - completed
 
