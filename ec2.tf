@@ -19,6 +19,10 @@ output "ec2_1_id" {
   value = aws_instance.ec2_1.id
 }
 
+output "ec2_1_public_ip" {
+  value = aws_instance.ec2_1.public_ip
+}
+
 resource "aws_instance" "ec2_2" {
   ami                    = var.my_ami
   instance_type          = "t3.micro"
@@ -33,4 +37,8 @@ resource "aws_instance" "ec2_2" {
 
 output "ec2_2_id" {
   value = aws_instance.ec2_2.id
+}
+
+output "ec2_2_public_ip" {
+  value = aws_instance.ec2_2.public_ip
 }
