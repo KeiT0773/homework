@@ -2,10 +2,10 @@ name: Ansible Only Deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "ansible/**"
+  workflow_run:
+    workflows: ["Terraform CI/CD"]
+    types:
+      - completed
 
 jobs:
   ansible:
