@@ -30,7 +30,7 @@ jobs:
         run: pip install ansible==13.0.0
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
+        uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.9.5
 
@@ -38,7 +38,7 @@ jobs:
         run: |
           cd ../
           terraform init -input=false
-          terraform output -raw ec2_1_public_ip > ./ansible/ec2_1_ip.txt
+          terraform output -raw ec2_1_public_ip 1> ./ansible/ec2_1_ip.txt 2>/dev/null
 
       - name: Debug EC2 IP
         run: cat ./ec2_1_ip.txt
