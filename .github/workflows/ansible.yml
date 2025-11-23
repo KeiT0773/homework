@@ -22,8 +22,8 @@ jobs:
         with:
           python-version: '3.13'
 
-      - name: Install Ansible
-        run: pip install ansible
+      - name: Install Ansible (fixed version)
+        run: pip install ansible==13.0.0
 
       - name: Setup SSH key
         run: |
