@@ -41,7 +41,7 @@ jobs:
           terraform output -raw ec2_1_public_ip > ./ansible/ec2_1_ip.txt
 
       - name: Debug EC2 IP
-        run: cat ./ansible/ec2_1_ip.txt
+        run: cat ./ec2_1_ip.txt
 
       - name: Setup SSH key
         run: |
