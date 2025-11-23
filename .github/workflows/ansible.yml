@@ -43,11 +43,24 @@ jobs:
       - name: Debug EC2 IP
         run: cat ./ec2_1_ip.txt
 
+      - name: Get runner public IP
+        id: runner_ip
+        run: echo "RUNNER_IP=$(curl -s ifconfig.me)" >> $GITHUB_ENV
+
+      - name: Debug runner IP
+        run: echo "$RUNNER_IP"
+        
+      - name: Update Security Group with runner IP
+        run: |
+          cd ../
+          terraform apply -auto-approve \
+            -var "runner_cidr_block=${{ env.RUNNER_IP }}/32"
+
       - name: Setup SSH key
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/aws-study.pem
-          chmod 600 ~/.ssh/aws-study.pem
+          chmod 600 ~/.ssh/aws-study.pem            
 
       - name: Run Playbook
         run: |
