@@ -25,6 +25,11 @@ jobs:
       - name: Install Ansible (fixed version)
         run: pip install ansible==13.0.0
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.9.5
+
       - name: Get EC2 public IPs
         run: |
           cd ../
