@@ -1,5 +1,6 @@
 # variables
 variable "my_cidr_block" {}
+variable "runner_cidr_block" {}
 
 # EC2 securiry_group 
 resource "aws_security_group" "ec2" {
@@ -12,6 +13,14 @@ resource "aws_security_group" "ec2" {
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["${var.my_cidr_block}"]
+  }
+
+  ingress {
+    description = "SSH from Github Actions runner"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["${var.runner_cidr_block}"]
   }
 
   ingress {
