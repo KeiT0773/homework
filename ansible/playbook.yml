@@ -28,12 +28,12 @@
   become: true
   tasks:
   - name: execute chmod command
-    command: chmod +x /spring-boot/./gradlew
+    command: chmod +x ./spring-boot/./gradlew
     changed_when: false
 
 - hosts: all
   become: true
   tasks:
   - name: execute spring-boot operation command
-    command: /spring-boot/./gradlew bootRun
+    command: ./spring-boot/./gradlew bootRun
     changed_when: false
