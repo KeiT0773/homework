@@ -11,6 +11,14 @@
 - hosts: all
   become: true
   tasks:
+    - name: Install git
+      ansible.builtin.dnf:
+        name: git
+        state: present
+
+- hosts: all
+  become: true
+  tasks:
   - name: git clone
     ansible.builtin.git:
       repo: https://github.com/koujienami/aws-study.git
