@@ -22,4 +22,3 @@
   - name: git clone
     ansible.builtin.git:
       repo: https://github.com/koujienami/aws-study.git
-      dest: /home
