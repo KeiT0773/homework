@@ -24,8 +24,8 @@
        chdir: /home/ec2-user/aws-study/
       changed_when: false
 
-    - name: start spring boot in backgroud with nohup
-      command: nohup ./gradlew bootRun &
+    - name: start spring boot in background with nohup
+      ansible.builtin.shell: nohup ./gradlew bootRun > /home/ec2-user/aws-study/app.log 2>&1 &
       args:
         chdir: /home/ec2-user/aws-study
       changed_when: false
