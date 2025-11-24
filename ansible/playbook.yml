@@ -20,7 +20,7 @@
 
     - name: make gradlew executable
       ansible.builtin.file:
-        path: /home/ec2-user/aws-study/gradlew
+        path: /home/ec2-user/aws-study/./gradlew
         mode: '0755'
 
     - name: create systemd unit file for spring boot
@@ -36,7 +36,7 @@
           Type=simple
           User=ec2-user
           WorkingDirectory=/home/ec2-user/aws-study
-          ExecStart=/home/ec2-user/aws-study/gradlew bootRun --args='--server.address=0.0.0.0'
+          ExecStart=/home/ec2-user/aws-study/./gradlew bootRun --args='--server.address=0.0.0.0'
           Restart=always
           StandardOutput=journal
           StandardError=journal
