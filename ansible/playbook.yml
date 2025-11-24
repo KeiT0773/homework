@@ -23,3 +23,17 @@
     ansible.builtin.git:
       repo: https://github.com/koujienami/aws-study.git
       dest: /home/ec2-user/spring-boot
+
+- hosts: all
+  become: true
+  tasks:
+  - name: execute chmod command
+    command: chmod +x /spring-boot/./gradlew
+    changed_when: false
+
+- hosts: all
+  become: true
+  tasks:
+  - name: execute spring-boot operation command
+    command: /spring-boot/./gradlew bootRun
+    changed_when: false
