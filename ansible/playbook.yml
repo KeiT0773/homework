@@ -22,18 +22,22 @@
   - name: git clone
     ansible.builtin.git:
       repo: https://github.com/koujienami/aws-study.git
-      dest: /home/ec2-user/spring-boot
+      dest: /home/ec2-user/aws-study
 
 - hosts: all
   become: true
   tasks:
   - name: execute chmod command
-    command: chmod +x ./spring-boot/./gradlew
+    command: chmod +x ./gradlew
+    args:
+     chdir: /home/ec2-user/aws-study/
     changed_when: false
 
 - hosts: all
   become: true
   tasks:
   - name: execute spring-boot operation command
-    command: ./spring-boot/./gradlew bootRun
+    command: ./gradlew bootRun
+    args:
+     chdir: /home/ec2-user/aws-study/
     changed_when: false
