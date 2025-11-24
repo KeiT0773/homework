@@ -22,9 +22,6 @@
       ansible.builtin.file:
         path: /home/ec2-user/aws-study/gradlew
         mode: '0755'
-      args:
-       chdir: /home/ec2-user/aws-study/
-      changed_when: false
 
     - name: create systemd unit file for spring boot
       ansible.builtin.copy:
