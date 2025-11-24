@@ -22,4 +22,4 @@
   - name: git clone
     ansible.builtin.git:
       repo: https://github.com/koujienami/aws-study.git
-      dest: /home/ec2-user/
+      dest: /home/ec2-user/spring-boot
