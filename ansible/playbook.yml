@@ -19,13 +19,42 @@
         dest: /home/ec2-user/aws-study
 
     - name: make gradlew executable
-      command: chmod +x ./gradlew
+      ansible.builtin.file:
+        path: /home/ec2-user/aws-study/gradlew
+        mode: '0755'
       args:
        chdir: /home/ec2-user/aws-study/
       changed_when: false
 
-    - name: start spring boot in background with nohup
-      ansible.builtin.shell: nohup ./gradlew bootRun > /home/ec2-user/aws-study/app.log 2>&1 &
-      args:
-        chdir: /home/ec2-user/aws-study
-      changed_when: false
+    - name: create systemd unit file for spring boot
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/springboot.service
+        content: |
+          [Unit]
+          Description=Spring Boot Application
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=ec2-user
+          WorkingDirectory=/home/ec2-user/aws-study
+          ExecStart=/home/ec2-user/aws-study/gradlew bootRun
+          Restart=always
+          StandardOutput=journal
+          StandardError=journal
+
+          [Install]
+          WantedBy=multi-user.target
+      notify:
+        - reload systemd
+
+    - name: enable and start spring boot service
+      ansible.builtin.systemd:
+        name: springboot.service
+        enabled: true
+        state: started
+
+  handlers:
+    - name: reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
