@@ -1,5 +1,5 @@
 ---
-- name: Install Amazon Corretto 21 on Amazon Linux 2023
+- name: Operate Spring-Boot
   hosts: all
   become: true
   tasks:
@@ -7,3 +7,11 @@
       ansible.builtin.dnf:
         name: java-21-amazon-corretto-devel.x86_64
         state: present
+
+- hosts: all
+  become: true
+  tasks:
+  - name: git clone
+    ansible.builtin.git:
+      repo: https://github.com/koujienami/aws-study.git
+      dest: /home
