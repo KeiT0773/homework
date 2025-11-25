@@ -1,9 +1,73 @@
 ---
-- name: Install Amazon Corretto 21 on Amazon Linux 2023
+- name: Operate Spring-Boot
   hosts: all
   become: true
+  vars:
+    springboot_user: ec2-user
+    springboot_workdir: /home/ec2-user/aws-study
+    springboot_war: demo-0.0.1-SNAPSHOT.war
+
   tasks:
     - name: Install Amazon Corretto 21 JDK
       ansible.builtin.dnf:
         name: java-21-amazon-corretto-devel.x86_64
         state: present
+
+    - name: Install git
+      ansible.builtin.dnf:
+        name: git
+        state: present
+
+    - name: git clone
+      become: true
+      become_user: "{{ springboot_user }}"
+      ansible.builtin.git:
+        repo: https://github.com/koujienami/aws-study.git
+        dest: "{{ springboot_workdir }}"
+
+    - name: make gradlew executable
+      ansible.builtin.file:
+        path: "{{ springboot_workdir }}/./gradlew"
+        mode: '0755'
+        owner: "{{ springboot_user }}"
+        group: "{{ springboot_user }}"
+
+    - name: build spring boot war (skip tests)
+      become: true
+      become_user: "{{ springboot_user }}"
+      ansible.builtin.shell: ./gradlew clean build -x test
+      args:
+        chdir: "{{ springboot_workdir }}"
+
+    - name: create environment file for spring boot
+      ansible.builtin.copy:
+        dest: /etc/sysconfig/springboot
+        content: |
+          SPRING_PROFILES_ACTIVE=prod
+          SERVER_PORT=8080
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: create systemd unit file for spring boot (template)
+      ansible.builtin.template:
+        src: templates/springboot.service.j2
+        dest: /etc/systemd/system/springboot.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify:
+        - reload systemd
+
+    - name: enable and start spring boot service
+      ansible.builtin.systemd:
+        name: springboot.service
+        enabled: true
+        state: started
+
+  handlers:
+    - name: reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+        name: springboot.service
+        state: restarted
