@@ -21,7 +21,12 @@
     - name: make gradlew executable
       ansible.builtin.file:
         path: /home/ec2-user/aws-study/./gradlew
-        mode: '0755'
+        mode: +x
+
+    - name: build spring boot war (skip tests)
+      ansible.builtin.shell: ./gradlew clean build -x test
+      args:
+        chdir: /home/ec2-user/aws-study
 
     - name: create systemd unit file for spring boot
       ansible.builtin.copy:
@@ -29,14 +34,14 @@
         content: |
           [Unit]
           Description=Spring Boot Application
-          After=network.target
+          After=network-online.target
           Wants=network-online.target
 
           [Service]
           Type=simple
           User=ec2-user
           WorkingDirectory=/home/ec2-user/aws-study
-          ExecStart=/home/ec2-user/aws-study/./gradlew bootRun --args='--server.address=0.0.0.0'
+          ExecStart=/usr/bin/java -jar /home/ec2-user/aws-study/build/libs/demo-0.0.1-SNAPSHOT.war
           Restart=always
           StandardOutput=journal
           StandardError=journal
