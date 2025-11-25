@@ -14,8 +14,6 @@
         state: present
 
     - name: Install git
-      become: true
-      become_user: "{{ springboot_user }}"
       ansible.builtin.dnf:
         name: git
         state: present
