@@ -14,6 +14,8 @@
         state: present
 
     - name: git clone
+      become: true
+      become_user: ec2-user
       ansible.builtin.git:
         repo: https://github.com/koujienami/aws-study.git
         dest: /home/ec2-user/aws-study
@@ -21,9 +23,13 @@
     - name: make gradlew executable
       ansible.builtin.file:
         path: /home/ec2-user/aws-study/./gradlew
-        mode: +x
+        mode: '0755'
+        owner: ec2-user
+        group: ec2-user
 
     - name: build spring boot war (skip tests)
+      become: true
+      become_user: ec2-user
       ansible.builtin.shell: ./gradlew clean build -x test
       args:
         chdir: /home/ec2-user/aws-study
